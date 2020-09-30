@@ -7,6 +7,7 @@ Created on Thu Sep 24 15:41:10 2020
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+import gdal
 
 def plot_spectral_signature(df):
   """
@@ -22,3 +23,23 @@ def plot_spectral_signature(df):
   df_pivot.index = number_bands
 
   sns.lineplot(data=df_pivot)
+  
+def to_GeoTIFF(out_name, clf, data, raster):
+  """
+  Function to convert the classified raster of our ROI to geotiff.
+  The result will also be plotted when using this function.
+  """
+  classified_raster = clf.predict(data.values).reshape((raster.RasterYSize,
+  raster.RasterXSize))
+  
+  driverTiff = gdal.GetDriverByName('GTiff') 
+  clfds = driverTiff.Create(out_name, raster.RasterXSize, raster.RasterYSize, 1, gdal.GDT_Float32)
+  clfds.SetGeoTransform(raster.GetGeoTransform())
+  clfds.SetProjection(raster.GetProjection())
+  clfds.GetRasterBand(1).SetNoDataValue(-9999.0)
+  clfds.GetRasterBand(1).WriteArray(classified_raster)
+  
+  #visualise the result 
+  band = clfds.GetRasterBand(1)
+  arr = band.ReadAsArray()
+  plt.imshow(arr)
