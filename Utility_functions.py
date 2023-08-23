@@ -7,7 +7,7 @@ Created on Thu Sep 24 15:41:10 2020
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-import gdal
+from osgeo import gdal
 
 def plot_spectral_signature(df):
   """
